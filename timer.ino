@@ -11,16 +11,64 @@ uint32_t start_time;
 uint16_t start = 0;
 uint8_t button_state = 0;
 
-uint32_t get_min_left(uint32_t time_left);
-uint32_t get_sec_left(uint32_t time_left);
+// 4 digit
+//Set cathode interface
+int a = 1;
+int b = 2;
+int c = 3;
+int d = 4;
+int e = 5;
+int f = 6;
+int g = 7;
+int dp = 8;
+//Set anode interface
+int d4 = 9;
+int d3 = 10;
+int d2 = 11;
+int d1 = 13;
+//Set variable
+long n = 1230;
+int x = 100;
+int del = 55;  //Here to fine tune the clock	
+
+uint8_t get_min_left(uint32_t time_left);
+uint8_t get_sec_left(uint32_t time_left);
+void set_digit(uint8_t n);
+void print_0(uint8_t has_point);
+void print_1(uint8_t has_point);
+void print_2(uint8_t has_point);
+void print_3(uint8_t has_point);
+void print_4(uint8_t has_point);
+void print_5(uint8_t has_point);
+void print_6(uint8_t has_point);
+void print_7(uint8_t has_point);
+void print_8(uint8_t has_point);
+void print_9(uint8_t has_point);
+void clear_display(uint8_t has_point);
+void display_number(uint8_t n, uint8_t has_point);
+void display_all(uint8_t x, uint8_t num);
 
 void setup() {
-  Serial.begin(9600);
+  // Serial.begin(9600);
 
   pinMode(down_button, INPUT);
   pinMode(up_button, INPUT);
   pinMode(val_button, INPUT);
   pinMode(start_button, INPUT);
+
+  // 4 digit
+  pinMode(d1, OUTPUT);
+  pinMode(d2, OUTPUT);
+  pinMode(d3, OUTPUT);
+  pinMode(d4, OUTPUT);
+  pinMode(a, OUTPUT);
+  pinMode(b, OUTPUT);
+  pinMode(c, OUTPUT);
+  pinMode(d, OUTPUT);
+  pinMode(e, OUTPUT);
+  pinMode(f, OUTPUT);
+  pinMode(g, OUTPUT);
+  pinMode(dp, OUTPUT);
 
   while (!start) {
 
@@ -33,10 +81,12 @@ void setup() {
       else if (button_state && (user_input + tens_mins) <= max_mins) {
         user_input += tens_mins;
       }
-      Serial.print("time set: ");
-      Serial.print(get_min_left(user_input));
-      Serial.print(".");
-      Serial.println(get_sec_left(user_input));
+      clear_display(0);
+      display_all(1, get_min_left(user_input) / 10);
+      // Serial.print("time set: ");
+      // Serial.print(get_min_left(user_input));
+      // Serial.print(".");
+      // Serial.println(get_sec_left(user_input));
     }
 
     if (analogRead(down_button)) {
@@ -52,10 +102,10 @@ void setup() {
           user_input -= tens_mins;
         }
       }
-      Serial.print("time set: ");
-      Serial.print(get_min_left(user_input));
-      Serial.print(".");
-      Serial.println(get_sec_left(user_input));
+      // Serial.print("time set: ");
+      // Serial.print(get_min_left(user_input));
+      // Serial.print(".");
+      // Serial.println(get_sec_left(user_input));
     }
 
     if (analogRead(val_button)) {
@@ -81,26 +131,205 @@ void loop() {
     user_input -= 1000;
 
     if (user_input) {
-      Serial.print("time: ");
-      Serial.print(get_min_left(user_input));
-      Serial.print(".");
-      Serial.println(get_sec_left(user_input));
+      // Serial.print("time: ");
+      // Serial.print(get_min_left(user_input));
+      // Serial.print(".");
+      // Serial.println(get_sec_left(user_input));
     }
 
   } else if (!user_input) {
-    Serial.print("time: ");
-    Serial.print(get_min_left(user_input));
-    Serial.print(".");
-    Serial.println(get_sec_left(user_input));
+    // Serial.print("time: ");
+    // Serial.print(get_min_left(user_input));
+    // Serial.print(".");
+    // Serial.println(get_sec_left(user_input));
     delay(1000);
   }
 
 }
 
-uint32_t get_min_left(uint32_t time_left) {
+uint8_t get_min_left(uint32_t time_left) {
   return time_left / ones_mins;
 }
 
-uint32_t get_sec_left(uint32_t time_left) {
+uint8_t get_sec_left(uint32_t time_left) {
   return (time_left % ones_mins) / 1000;
+}
+
+void set_digit(uint8_t n) {
+  switch(n) {
+    case 1: 
+      digitalWrite(d1, HIGH);
+      digitalWrite(d2, LOW);
+      digitalWrite(d3, LOW);
+      digitalWrite(d4, LOW);   
+      break;
+    case 2: 
+      digitalWrite(d1, LOW);
+      digitalWrite(d2, HIGH);
+      digitalWrite(d3, LOW);
+      digitalWrite(d4, LOW); 
+      break;
+	  case 3: 
+	    digitalWrite(d1, LOW);
+ 	    digitalWrite(d2, LOW);
+	    digitalWrite(d3, HIGH);
+	    digitalWrite(d4, LOW); 
+	    break;
+	  case 4: 
+	    digitalWrite(d1, LOW);
+ 	    digitalWrite(d2, LOW);
+	    digitalWrite(d3, LOW);
+	    digitalWrite(d4, HIGH); 
+	    break;
+    default :
+      digitalWrite(d1, LOW);
+	    digitalWrite(d2, LOW);
+	    digitalWrite(d3, LOW);
+	    digitalWrite(d4, LOW);
+      break;
+	}
+}
+
+void print_0(uint8_t has_point) {
+  digitalWrite(a, LOW);
+  digitalWrite(b, LOW);
+  digitalWrite(c, LOW);
+  digitalWrite(d, LOW);
+  digitalWrite(e, LOW);
+  digitalWrite(f, LOW);
+  digitalWrite(g, HIGH);
+  digitalWrite(dp, has_point ? LOW : HIGH);
+}
+
+void print_1(uint8_t has_point) {
+  digitalWrite(a, HIGH);
+  digitalWrite(b, LOW);
+  digitalWrite(c, LOW);
+  digitalWrite(d, HIGH);
+  digitalWrite(e, HIGH);
+  digitalWrite(f, HIGH);
+  digitalWrite(g, HIGH);
+  digitalWrite(dp, has_point ? LOW : HIGH);
+}
+
+void print_2(uint8_t has_point) {
+  digitalWrite(a, LOW);
+  digitalWrite(b, LOW);
+  digitalWrite(c, HIGH);
+  digitalWrite(d, LOW);
+  digitalWrite(e, LOW);
+  digitalWrite(f, HIGH);
+  digitalWrite(g, LOW);
+  digitalWrite(dp, has_point ? LOW : HIGH);
+}
+
+void print_3(uint8_t has_point) {
+  digitalWrite(a, LOW);
+  digitalWrite(b, LOW);
+  digitalWrite(c, LOW);
+  digitalWrite(d, LOW);
+  digitalWrite(e, HIGH);
+  digitalWrite(f, HIGH);
+  digitalWrite(g, LOW);
+  digitalWrite(dp, has_point ? LOW : HIGH);
+}
+
+void print_4(uint8_t has_point) {
+  digitalWrite(a, HIGH);
+  digitalWrite(b, LOW);
+  digitalWrite(c, LOW);
+  digitalWrite(d, HIGH);
+  digitalWrite(e, HIGH);
+  digitalWrite(f, LOW);
+  digitalWrite(g, LOW);
+  digitalWrite(dp, has_point ? LOW : HIGH);
+}
+
+void print_5(uint8_t has_point) {
+  digitalWrite(a, LOW);
+  digitalWrite(b, HIGH);
+  digitalWrite(c, LOW);
+  digitalWrite(d, LOW);
+  digitalWrite(e, HIGH);
+  digitalWrite(f, LOW);
+  digitalWrite(g, LOW);
+  digitalWrite(dp, has_point ? LOW : HIGH);
+}
+
+void print_6(uint8_t has_point) {
+  digitalWrite(a, LOW);
+  digitalWrite(b, HIGH);
+  digitalWrite(c, LOW);
+  digitalWrite(d, LOW);
+  digitalWrite(e, LOW);
+  digitalWrite(f, LOW);
+  digitalWrite(g, LOW);
+  digitalWrite(dp, has_point ? LOW : HIGH);
+}
+
+void print_7(uint8_t has_point) {
+  digitalWrite(a, LOW);
+  digitalWrite(b, LOW);
+  digitalWrite(c, LOW);
+  digitalWrite(d, HIGH);
+  digitalWrite(e, HIGH);
+  digitalWrite(f, HIGH);
+  digitalWrite(g, HIGH);
+  digitalWrite(dp, has_point ? LOW : HIGH);
+}
+
+void print_8(uint8_t has_point) {
+  digitalWrite(a, LOW);
+  digitalWrite(b, LOW);
+  digitalWrite(c, LOW);
+  digitalWrite(d, LOW);
+  digitalWrite(e, LOW);
+  digitalWrite(f, LOW);
+  digitalWrite(g, LOW);
+  digitalWrite(dp, has_point ? LOW : HIGH);
+}
+
+void print_9(uint8_t has_point) {
+  digitalWrite(a, LOW);
+  digitalWrite(b, LOW);
+  digitalWrite(c, LOW);
+  digitalWrite(d, LOW);
+  digitalWrite(e, HIGH);
+  digitalWrite(f, LOW);
+  digitalWrite(g, LOW);
+  digitalWrite(dp, has_point ? LOW : HIGH);
+}
+
+void clear_display(uint8_t has_point) {
+  digitalWrite(a, HIGH);
+  digitalWrite(b, HIGH);
+  digitalWrite(c, HIGH);
+  digitalWrite(d, HIGH);
+  digitalWrite(e, HIGH);
+  digitalWrite(f, HIGH);
+  digitalWrite(g, HIGH);
+  digitalWrite(dp, has_point ? LOW : HIGH);
+}
+
+void display_number(uint8_t n, uint8_t has_point) {
+  switch(n) {
+    case 0: print_0(has_point); break;
+    case 1: print_1(has_point); break;
+    case 2: print_2(has_point); break;
+    case 3: print_3(has_point); break;
+    case 4: print_4(has_point); break;
+    case 5: print_5(has_point); break;
+    case 6: print_6(has_point); break;
+    case 7: print_7(has_point); break;
+    case 8: print_8(has_point); break;
+    case 9: print_9(has_point); break;
+    default: clear_display(has_point); break; 
+  }
+}
+
+void display_all(uint8_t x, uint8_t num) {
+  set_digit(x);
+  display_number(num, 0);
+  // delay(1);
+  // clear_display();
 }
