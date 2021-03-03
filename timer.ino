@@ -7,7 +7,8 @@ uint32_t user_input = 0;
 uint32_t start_time;
 
 uint16_t start = 0;
-uint8_t undo_state = 0;
+uint8_t undo_state = 1;
+uint8_t button_state = 1;
 
 uint32_t get_min_left(uint32_t time_left);
 uint32_t get_sec_left(uint32_t time_left);
@@ -47,7 +48,7 @@ void setup() {
     if (analogRead(undo_button)) {
       while (analogRead(undo_button)) {
       }
-      
+
       if (undo_state == 1 && user_input > 60000) {
         user_input -= 60000;
       } 
