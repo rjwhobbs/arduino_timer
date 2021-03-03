@@ -1,14 +1,13 @@
-const uint8_t undo_button = A3;
-const uint8_t ones_button = A2;
-const uint8_t tens_button = A1;
+const uint8_t down_button = A3;
+const uint8_t up_button = A2;
+const uint8_t val_button = A1;
 const uint8_t start_button = A5;
 
 uint32_t user_input = 0;
 uint32_t start_time;
 
 uint16_t start = 0;
-uint8_t undo_state = 1;
-uint8_t button_state = 1;
+uint8_t button_state = 0;
 
 uint32_t get_min_left(uint32_t time_left);
 uint32_t get_sec_left(uint32_t time_left);
@@ -16,51 +15,51 @@ uint32_t get_sec_left(uint32_t time_left);
 void setup() {
   Serial.begin(9600);
 
-  pinMode(undo_button, INPUT);
-  pinMode(ones_button, INPUT);
-  pinMode(tens_button, INPUT);
+  pinMode(down_button, INPUT);
+  pinMode(up_button, INPUT);
+  pinMode(val_button, INPUT);
   pinMode(start_button, INPUT);
 
   while (!start) {
 
-    if (analogRead(ones_button)) {
-      while (analogRead(ones_button)) {
+    if (analogRead(up_button)) {
+      while (analogRead(up_button)) {
       }
-      user_input += 60000;
-      undo_state = 1;
-      Serial.print("ones set: ");
+      if (!button_state) {
+        user_input += 60000;
+      }
+      else if (button_state) {
+        user_input += 600000;
+      }
+      Serial.print("time set: ");
       Serial.print(get_min_left(user_input));
       Serial.print(".");
       Serial.println(get_sec_left(user_input));
     }
 
-    if (analogRead(tens_button)) {
-      while (analogRead(tens_button)) {
+    if (analogRead(down_button)) {
+      while (analogRead(down_button)) {
       }
-      user_input += 600000;
-      undo_state = 10;
-      Serial.print("tens set: ");
-      Serial.print(get_min_left(user_input));
-      Serial.print(".");
-      Serial.println(get_sec_left(user_input));
-    }
-
-    if (analogRead(undo_button)) {
-      while (analogRead(undo_button)) {
+      if (!button_state) {
+        if (user_input > 60000) {
+          user_input -= 60000;
+        }
       }
-
-      if (undo_state == 1 && user_input > 60000) {
-        user_input -= 60000;
-      } 
-      else if (undo_state == 10 && user_input > 600000) {
-        if (user_input - 600000 >= 60000) {
+      else if (button_state) {
+        if (user_input > 600000 && user_input - 600000 >= 60000) {
           user_input -= 600000;
         }
       }
-      Serial.print("undo set: ");
+      Serial.print("time set: ");
       Serial.print(get_min_left(user_input));
       Serial.print(".");
       Serial.println(get_sec_left(user_input));
+    }
+
+    if (analogRead(val_button)) {
+      while (analogRead(val_button)) {
+      }
+      button_state = !button_state;
     }
 
     if (analogRead(start_button)) {
