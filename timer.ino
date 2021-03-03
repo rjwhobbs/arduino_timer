@@ -2,10 +2,12 @@ const uint8_t down_button = A3;
 const uint8_t up_button = A2;
 const uint8_t val_button = A1;
 const uint8_t start_button = A5;
+const uint32_t max_mins = 5940000;
+const uint32_t ones_mins = 60000;
+const uint32_t tens_mins = 600000;
 
 uint32_t user_input = 0;
 uint32_t start_time;
-
 uint16_t start = 0;
 uint8_t button_state = 0;
 
@@ -25,11 +27,11 @@ void setup() {
     if (analogRead(up_button)) {
       while (analogRead(up_button)) {
       }
-      if (!button_state) {
-        user_input += 60000;
+      if (!button_state && user_input < max_mins) {
+        user_input += ones_mins;
       }
-      else if (button_state) {
-        user_input += 600000;
+      else if (button_state && (user_input + tens_mins) <= max_mins) {
+        user_input += tens_mins;
       }
       Serial.print("time set: ");
       Serial.print(get_min_left(user_input));
@@ -41,13 +43,13 @@ void setup() {
       while (analogRead(down_button)) {
       }
       if (!button_state) {
-        if (user_input > 60000) {
-          user_input -= 60000;
+        if (user_input > ones_mins) {
+          user_input -= ones_mins;
         }
       }
       else if (button_state) {
-        if (user_input > 600000 && user_input - 600000 >= 60000) {
-          user_input -= 600000;
+        if (user_input > tens_mins && user_input - tens_mins >= ones_mins) {
+          user_input -= tens_mins;
         }
       }
       Serial.print("time set: ");
@@ -96,9 +98,9 @@ void loop() {
 }
 
 uint32_t get_min_left(uint32_t time_left) {
-  return time_left / 60000;
+  return time_left / ones_mins;
 }
 
 uint32_t get_sec_left(uint32_t time_left) {
-  return (time_left % 60000) / 1000;
+  return (time_left % ones_mins) / 1000;
 }
