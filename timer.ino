@@ -1,6 +1,6 @@
 const uint8_t down_button = A3;
 const uint8_t up_button = A2;
-const uint8_t val_button = A1;
+const uint8_t unit_button = A1;
 const uint8_t start_button = A5;
 const uint32_t max_mins = 5940000;
 const uint32_t ones_mins = 60000;
@@ -9,7 +9,7 @@ const uint32_t tens_mins = 600000;
 uint32_t user_input = 0;
 uint32_t start_time;
 uint16_t start = 0;
-uint8_t button_state = 0;
+uint8_t unit_button_state = 0;
 
 // 4 digit
 //Set cathode interface
@@ -53,7 +53,7 @@ void setup() {
 
   pinMode(down_button, INPUT);
   pinMode(up_button, INPUT);
-  pinMode(val_button, INPUT);
+  pinMode(unit_button, INPUT);
   pinMode(start_button, INPUT);
 
   // 4 digit
@@ -75,14 +75,12 @@ void setup() {
     if (analogRead(up_button)) {
       while (analogRead(up_button)) {
       }
-      if (!button_state && user_input < max_mins) {
+      if (!unit_button_state && user_input < max_mins) {
         user_input += ones_mins;
       }
-      else if (button_state && (user_input + tens_mins) <= max_mins) {
+      else if (unit_button_state && (user_input + tens_mins) <= max_mins) {
         user_input += tens_mins;
       }
-      clear_display(0);
-      display_all(1, get_min_left(user_input) / 10);
       // Serial.print("time set: ");
       // Serial.print(get_min_left(user_input));
       // Serial.print(".");
@@ -92,12 +90,12 @@ void setup() {
     if (analogRead(down_button)) {
       while (analogRead(down_button)) {
       }
-      if (!button_state) {
+      if (!unit_button_state) {
         if (user_input > ones_mins) {
           user_input -= ones_mins;
         }
       }
-      else if (button_state) {
+      else if (unit_button_state) {
         if (user_input > tens_mins && user_input - tens_mins >= ones_mins) {
           user_input -= tens_mins;
         }
@@ -108,10 +106,10 @@ void setup() {
       // Serial.println(get_sec_left(user_input));
     }
 
-    if (analogRead(val_button)) {
-      while (analogRead(val_button)) {
+    if (analogRead(unit_button)) {
+      while (analogRead(unit_button)) {
       }
-      button_state = !button_state;
+      unit_button_state = !unit_button_state;
     }
 
     if (analogRead(start_button)) {
@@ -119,6 +117,13 @@ void setup() {
       }
       start = true;
     }
+
+    display_all(1, get_min_left(user_input) / 10);
+    delay(1);
+    clear_display(0);
+    display_all(2, get_min_left(user_input) % 10);
+    delay(1);
+    clear_display(0);
   }
   
   start_time = millis();
@@ -188,6 +193,29 @@ void set_digit(uint8_t n) {
 	    digitalWrite(d4, LOW);
       break;
 	}
+}
+
+void display_all(uint8_t x, uint8_t num) {
+  set_digit(x);
+  display_number(num, 0);
+  // delay(1);
+  // clear_display();
+}
+
+void display_number(uint8_t n, uint8_t has_point) {
+  switch(n) {
+    case 0: print_0(has_point); break;
+    case 1: print_1(has_point); break;
+    case 2: print_2(has_point); break;
+    case 3: print_3(has_point); break;
+    case 4: print_4(has_point); break;
+    case 5: print_5(has_point); break;
+    case 6: print_6(has_point); break;
+    case 7: print_7(has_point); break;
+    case 8: print_8(has_point); break;
+    case 9: print_9(has_point); break;
+    default: clear_display(has_point); break; 
+  }
 }
 
 void print_0(uint8_t has_point) {
@@ -309,27 +337,4 @@ void clear_display(uint8_t has_point) {
   digitalWrite(f, HIGH);
   digitalWrite(g, HIGH);
   digitalWrite(dp, has_point ? LOW : HIGH);
-}
-
-void display_number(uint8_t n, uint8_t has_point) {
-  switch(n) {
-    case 0: print_0(has_point); break;
-    case 1: print_1(has_point); break;
-    case 2: print_2(has_point); break;
-    case 3: print_3(has_point); break;
-    case 4: print_4(has_point); break;
-    case 5: print_5(has_point); break;
-    case 6: print_6(has_point); break;
-    case 7: print_7(has_point); break;
-    case 8: print_8(has_point); break;
-    case 9: print_9(has_point); break;
-    default: clear_display(has_point); break; 
-  }
-}
-
-void display_all(uint8_t x, uint8_t num) {
-  set_digit(x);
-  display_number(num, 0);
-  // delay(1);
-  // clear_display();
 }
