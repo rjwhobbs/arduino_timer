@@ -7,9 +7,9 @@ const uint32_t max_mins = 5940000;
 const uint32_t ones_mins = 60000;
 const uint32_t tens_mins = 600000;
 
-uint32_t user_input = 60000;
+uint32_t user_input = 1000;
 uint32_t start_time;
-uint16_t start = 0;
+uint8_t start = 0;
 uint8_t unit_button_state = 0;
 
 // 4 digit 7 segment display
@@ -26,6 +26,7 @@ const uint8_t d3 = 10;
 const uint8_t d2 = 11;
 const uint8_t d1 = 13;
 uint16_t display_rate = 600;
+uint16_t buzzer_rate = 676;
 uint32_t flash_time;
 uint16_t flash_rate = 350;
 uint8_t flash_state = 0;
@@ -125,7 +126,7 @@ void setup() {
         set_flash_state();
         display_all();
       }
-      start = true;
+      start = 1;
       flash_d1 = 0;
       flash_d2 = 0;
     }
@@ -157,9 +158,9 @@ void loop() {
       }
       else {
         digitalWrite(buzzer_pin, HIGH);
-        delayMicroseconds(700);
+        delayMicroseconds(buzzer_rate);
         digitalWrite(buzzer_pin, LOW);
-        delayMicroseconds(700);
+        delayMicroseconds(buzzer_rate);
       }
     } 
     start_time = millis();
