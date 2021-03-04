@@ -2,30 +2,29 @@ const uint8_t down_button = A3;
 const uint8_t up_button = A2;
 const uint8_t unit_button = A1;
 const uint8_t start_button = A5;
+const uint8_t buzzer_pin = 12;
 const uint32_t max_mins = 5940000;
 const uint32_t ones_mins = 60000;
 const uint32_t tens_mins = 600000;
 
-uint32_t user_input = 60000;
+uint32_t user_input = 2000;
 uint32_t start_time;
 uint16_t start = 0;
 uint8_t unit_button_state = 0;
 
 // 4 digit 7 segment display
-//Set cathode interface
-int a = 1;
-int b = 2;
-int c = 3;
-int d = 4;
-int e = 5;
-int f = 6;
-int g = 7;
-int dp = 8;
-//Set anode interface
-int d4 = 9;
-int d3 = 10;
-int d2 = 11;
-int d1 = 13;
+const uint8_t a = 1;
+const uint8_t b = 2;
+const uint8_t c = 3;
+const uint8_t d = 4;
+const uint8_t e = 5;
+const uint8_t f = 6;
+const uint8_t g = 7;
+const uint8_t dp = 8;
+const uint8_t d4 = 9;
+const uint8_t d3 = 10;
+const uint8_t d2 = 11;
+const uint8_t d1 = 13;
 uint16_t display_rate = 600;
 uint32_t flash_time;
 uint16_t flash_rate = 350;
@@ -60,6 +59,8 @@ void setup() {
   pinMode(up_button, INPUT);
   pinMode(unit_button, INPUT);
   pinMode(start_button, INPUT);
+
+//  digitalWrite(buzzer_pin, LOW);
 
   // 4 digit
   pinMode(d1, OUTPUT);
@@ -146,19 +147,24 @@ void loop() {
 
   if (!user_input) {
     start_time = millis();
+    pinMode(buzzer_pin, OUTPUT);
   }
   
   while (!user_input) {
-    if (start_time > millis() - 650) {
+    while (start_time > millis() - 650) {
       if (flash_end_state) {
         // Serial.println(flash_end_state);
         display_all();
       }
+      else {
+        digitalWrite(buzzer_pin, HIGH);
+        delayMicroseconds(700);
+        digitalWrite(buzzer_pin, LOW);
+        delayMicroseconds(700);
+      }
     } 
-    else {
-      start_time = millis();
-      flash_end_state = !flash_end_state;
-    }
+    start_time = millis();
+    flash_end_state = !flash_end_state;
   }
 
   if (user_input) {
