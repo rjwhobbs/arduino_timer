@@ -26,6 +26,10 @@ int d4 = 9;
 int d3 = 10;
 int d2 = 11;
 int d1 = 13;
+uint16_t display_rate = 600;
+uint32_t flash_time;
+uint16_t flash_rate = 350;
+uint8_t flash_state = 0;
 
 uint8_t get_min_left(uint32_t time_left);
 uint8_t get_sec_left(uint32_t time_left);
@@ -42,7 +46,7 @@ void print_8(uint8_t has_point);
 void print_9(uint8_t has_point);
 void clear_display(uint8_t has_point);
 void display_number(uint8_t n, uint8_t has_point);
-void display_all(uint8_t digit, uint8_t num, uint8_t has_point);
+void display_digit(uint8_t digit, uint8_t num, uint8_t has_point);
 
 void setup() {
   // Serial.begin(9600);
@@ -66,7 +70,14 @@ void setup() {
   pinMode(g, OUTPUT);
   pinMode(dp, OUTPUT);
 
+  flash_time = millis();
+
   while (!start) {
+
+    if (millis() > flash_time + flash_rate) {
+      flash_state = !flash_state;
+      flash_time = millis();
+    }
 
     if (analogRead(up_button)) {
       while (analogRead(up_button)) {
@@ -114,17 +125,19 @@ void setup() {
       start = true;
     }
 
-    display_all(1, get_min_left(user_input) / 10, 0);
-    delay(1);
+    display_digit(1, get_min_left(user_input) / 10, 0);
+    delayMicroseconds(display_rate);
     clear_display(0);
-    display_all(2, get_min_left(user_input) % 10, 1);
-    delay(1);
+    if (flash_state) {
+      display_digit(2, get_min_left(user_input) % 10, 1);
+      delayMicroseconds(display_rate);
+      clear_display(0);
+    }
+    display_digit(3, get_sec_left(user_input) / 10, 0);
+    delayMicroseconds(display_rate);
     clear_display(0);
-    display_all(3, get_sec_left(user_input) / 10, 0);
-    delay(1);
-    clear_display(0);
-    display_all(4, get_sec_left(user_input) % 10, 0);
-    delay(1);
+    display_digit(4, get_sec_left(user_input) % 10, 0);
+    delayMicroseconds(display_rate);
     clear_display(0);
   }
   
@@ -136,22 +149,36 @@ void loop() {
   if (millis() > start_time + 1000 && user_input) {
     start_time += 1000;
     user_input -= 1000;
-
-    if (user_input) {
-      // Serial.print("time: ");
-      // Serial.print(get_min_left(user_input));
-      // Serial.print(".");
-      // Serial.println(get_sec_left(user_input));
-    }
-
-  } else if (!user_input) {
-    // Serial.print("time: ");
-    // Serial.print(get_min_left(user_input));
-    // Serial.print(".");
-    // Serial.println(get_sec_left(user_input));
+  } 
+  
+  while (!user_input) {
+    display_digit(1, get_min_left(user_input) / 10, 0);
+    delayMicroseconds(display_rate);
+    clear_display(0);
+    display_digit(2, get_min_left(user_input) % 10, 1);
+    delayMicroseconds(display_rate);
+    clear_display(0);
+    display_digit(3, get_sec_left(user_input) / 10, 0);
+    delayMicroseconds(display_rate);
+    clear_display(0);
+    display_digit(4, get_sec_left(user_input) % 10, 0);
+    delayMicroseconds(display_rate);
+    clear_display(0);
     delay(1000);
   }
 
+  display_digit(1, get_min_left(user_input) / 10, 0);
+  delayMicroseconds(display_rate);
+  clear_display(0);
+  display_digit(2, get_min_left(user_input) % 10, 1);
+  delayMicroseconds(display_rate);
+  clear_display(0);
+  display_digit(3, get_sec_left(user_input) / 10, 0);
+  delayMicroseconds(display_rate);
+  clear_display(0);
+  display_digit(4, get_sec_left(user_input) % 10, 0);
+  delayMicroseconds(display_rate);
+  clear_display(0);
 }
 
 uint8_t get_min_left(uint32_t time_left) {
@@ -160,6 +187,11 @@ uint8_t get_min_left(uint32_t time_left) {
 
 uint8_t get_sec_left(uint32_t time_left) {
   return (time_left % ones_mins) / 1000;
+}
+
+void display_digit(uint8_t digit, uint8_t num, uint8_t has_point) {
+  set_digit(digit);
+  display_number(num, has_point);
 }
 
 void set_digit(uint8_t digit) {
@@ -195,13 +227,6 @@ void set_digit(uint8_t digit) {
 	    digitalWrite(d4, LOW);
       break;
 	}
-}
-
-void display_all(uint8_t digit, uint8_t num, uint8_t has_point) {
-  set_digit(digit);
-  display_number(num, has_point);
-  // delay(1);
-  // clear_display();
 }
 
 void display_number(uint8_t n, uint8_t has_point) {
