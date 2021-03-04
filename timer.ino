@@ -6,7 +6,7 @@ const uint32_t max_mins = 5940000;
 const uint32_t ones_mins = 60000;
 const uint32_t tens_mins = 600000;
 
-uint32_t user_input = 0;
+uint32_t user_input = 60000;
 uint32_t start_time;
 uint16_t start = 0;
 uint8_t unit_button_state = 0;
@@ -32,6 +32,7 @@ uint16_t flash_rate = 350;
 uint8_t flash_state = 0;
 uint8_t flash_d1 = 0;
 uint8_t flash_d2 = 1;
+uint8_t flash_end_state = 1;
 
 uint8_t get_min_left(uint32_t time_left);
 uint8_t get_sec_left(uint32_t time_left);
@@ -141,10 +142,27 @@ void loop() {
   if (millis() > start_time + 1000 && user_input) {
     start_time += 1000;
     user_input -= 1000;
-  } 
+  }
+
+  if (!user_input) {
+    start_time = millis();
+  }
   
   while (!user_input) {
-    delay(1000);
+    if (start_time > millis() - 650) {
+      if (flash_end_state) {
+        // Serial.println(flash_end_state);
+        display_all();
+      }
+    } 
+    else {
+      start_time = millis();
+      flash_end_state = !flash_end_state;
+    }
+  }
+
+  if (user_input) {
+    display_all();
   }
 }
 
