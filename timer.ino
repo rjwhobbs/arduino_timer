@@ -7,7 +7,7 @@ const uint32_t max_mins = 5940000;
 const uint32_t ones_mins = 60000;
 const uint32_t tens_mins = 600000;
 
-uint32_t user_input = 2000;
+uint32_t user_input = 60000;
 uint32_t start_time;
 uint16_t start = 0;
 uint8_t unit_button_state = 0;
@@ -59,8 +59,6 @@ void setup() {
   pinMode(up_button, INPUT);
   pinMode(unit_button, INPUT);
   pinMode(start_button, INPUT);
-
-//  digitalWrite(buzzer_pin, LOW);
 
   // 4 digit
   pinMode(d1, OUTPUT);
@@ -147,13 +145,14 @@ void loop() {
 
   if (!user_input) {
     start_time = millis();
+
+    // Buzzer softly sounds if initialized from start.
     pinMode(buzzer_pin, OUTPUT);
   }
   
   while (!user_input) {
     while (start_time > millis() - 650) {
       if (flash_end_state) {
-        // Serial.println(flash_end_state);
         display_all();
       }
       else {
@@ -173,36 +172,38 @@ void loop() {
 }
 
 void display_all() {
-  if (flash_d1) {
-    if (flash_state) {
-      display_digit(1, get_min_left(user_input) / 10);
-      delayMicroseconds(display_rate);
-      clear_display(0);
-    }
+
+  // Flashes are here to show the user which unit 
+  // they are adjusting.
+  if (flash_d1 && flash_state) {
+    display_digit(1, get_min_left(user_input) / 10);
+    delayMicroseconds(display_rate);
+    clear_display(0);
   }
-  else {
+  else if (!flash_d1) {
     display_digit(1, get_min_left(user_input) / 10);
     delayMicroseconds(display_rate);
     clear_display(0);
   }
     
-  if (flash_d2) {
-    if (flash_state) {
-      display_digit(2, get_min_left(user_input) % 10);
-      delayMicroseconds(display_rate);
-      clear_display(0);
-    }
+  if (flash_d2 && flash_state) {
+    display_digit(2, get_min_left(user_input) % 10);
+    delayMicroseconds(display_rate);
+    clear_display(0);
   } 
-  else {
+  else if (!flash_d2) {
     display_digit(2, get_min_left(user_input) % 10);
     delayMicroseconds(display_rate);
     clear_display(0);
   }
 
+  // Sets the decimal point of d2 to LOW while
+  // the number on d2 can flash independently.
   set_digit(2);
   clear_display(1);
   delayMicroseconds(display_rate);
   clear_display(0);
+  
   display_digit(3, get_sec_left(user_input) / 10);
   delayMicroseconds(display_rate);
   clear_display(0);
