@@ -26,14 +26,10 @@ int d4 = 9;
 int d3 = 10;
 int d2 = 11;
 int d1 = 13;
-//Set variable
-long n = 1230;
-int x = 100;
-int del = 55;  //Here to fine tune the clock	
 
 uint8_t get_min_left(uint32_t time_left);
 uint8_t get_sec_left(uint32_t time_left);
-void set_digit(uint8_t n);
+void set_digit(uint8_t digit);
 void print_0(uint8_t has_point);
 void print_1(uint8_t has_point);
 void print_2(uint8_t has_point);
@@ -46,7 +42,7 @@ void print_8(uint8_t has_point);
 void print_9(uint8_t has_point);
 void clear_display(uint8_t has_point);
 void display_number(uint8_t n, uint8_t has_point);
-void display_all(uint8_t x, uint8_t num);
+void display_all(uint8_t digit, uint8_t num, uint8_t has_point);
 
 void setup() {
   // Serial.begin(9600);
@@ -118,10 +114,16 @@ void setup() {
       start = true;
     }
 
-    display_all(1, get_min_left(user_input) / 10);
+    display_all(1, get_min_left(user_input) / 10, 0);
     delay(1);
     clear_display(0);
-    display_all(2, get_min_left(user_input) % 10);
+    display_all(2, get_min_left(user_input) % 10, 1);
+    delay(1);
+    clear_display(0);
+    display_all(3, get_sec_left(user_input) / 10, 0);
+    delay(1);
+    clear_display(0);
+    display_all(4, get_sec_left(user_input) % 10, 0);
     delay(1);
     clear_display(0);
   }
@@ -160,13 +162,13 @@ uint8_t get_sec_left(uint32_t time_left) {
   return (time_left % ones_mins) / 1000;
 }
 
-void set_digit(uint8_t n) {
-  switch(n) {
+void set_digit(uint8_t digit) {
+  switch(digit) {
     case 1: 
       digitalWrite(d1, HIGH);
       digitalWrite(d2, LOW);
       digitalWrite(d3, LOW);
-      digitalWrite(d4, LOW);   
+      digitalWrite(d4, LOW);
       break;
     case 2: 
       digitalWrite(d1, LOW);
@@ -195,9 +197,9 @@ void set_digit(uint8_t n) {
 	}
 }
 
-void display_all(uint8_t x, uint8_t num) {
-  set_digit(x);
-  display_number(num, 0);
+void display_all(uint8_t digit, uint8_t num, uint8_t has_point) {
+  set_digit(digit);
+  display_number(num, has_point);
   // delay(1);
   // clear_display();
 }
