@@ -7,9 +7,10 @@ const uint32_t max_mins = 5940000;
 const uint32_t ones_mins = 60000;
 const uint32_t tens_mins = 600000;
 
-uint32_t user_input = 1000;
+uint32_t user_input = 0;
 uint32_t start_time;
 uint8_t start = 0;
+uint8_t pause_pressed = 0;
 uint8_t unit_button_state = 0;
 
 // 4 digit 7 segment display
@@ -52,6 +53,8 @@ void display_number(uint8_t n);
 void display_digit(uint8_t digit, uint8_t num);
 void display_all();
 void set_flash_state();
+void read_user_input();
+void buzzer_alarm();
 
 void setup() {
   // Serial.begin(9600);
@@ -75,8 +78,55 @@ void setup() {
   pinMode(g, OUTPUT);
   pinMode(dp, OUTPUT);
 
-  flash_time = millis();
+  read_user_input();
+}
 
+void loop() {
+
+  if (analogRead(start_button)) {
+    pause_pressed = 1;
+  }
+  if (!analogRead(start_button) && pause_pressed) {
+    pause_pressed = 0;
+    start = 0;
+    flash_d1 = 0;
+    flash_d2 = 1;
+    read_user_input();
+  }
+  
+  if (millis() > start_time + 1000 && user_input) {
+    start_time += 1000;
+    user_input -= 1000;
+  }
+
+  if (!user_input) {
+    start_time = millis();
+
+    // Buzzer softly sounds if initialized so
+    // I initialized it here rather.
+    pinMode(buzzer_pin, OUTPUT);
+  }
+  
+  while (!user_input) {
+    while (start_time > millis() - 650) {
+      if (flash_end_state) {
+        display_all();
+      }
+      else {
+        buzzer_alarm();
+      }
+    } 
+    start_time = millis();
+    flash_end_state = !flash_end_state;
+  }
+
+  if (user_input) {
+    display_all();
+  }
+}
+
+void read_user_input() {
+  flash_time = millis();
   while (!start) {
 
     set_flash_state();
@@ -129,47 +179,12 @@ void setup() {
       start = 1;
       flash_d1 = 0;
       flash_d2 = 0;
+      unit_button_state = 0;
     }
 
     display_all();
   }
-  
   start_time = millis();
-}
-
-void loop() {
-  
-  if (millis() > start_time + 1000 && user_input) {
-    start_time += 1000;
-    user_input -= 1000;
-  }
-
-  if (!user_input) {
-    start_time = millis();
-
-    // Buzzer softly sounds if initialized from start.
-    pinMode(buzzer_pin, OUTPUT);
-  }
-  
-  while (!user_input) {
-    while (start_time > millis() - 650) {
-      if (flash_end_state) {
-        display_all();
-      }
-      else {
-        digitalWrite(buzzer_pin, HIGH);
-        delayMicroseconds(buzzer_rate);
-        digitalWrite(buzzer_pin, LOW);
-        delayMicroseconds(buzzer_rate);
-      }
-    } 
-    start_time = millis();
-    flash_end_state = !flash_end_state;
-  }
-
-  if (user_input) {
-    display_all();
-  }
 }
 
 void display_all() {
@@ -198,7 +213,7 @@ void display_all() {
     clear_display(0);
   }
 
-  // Sets the decimal point of d2 to LOW while
+  // Sets the decimal point of d2 to LOW so
   // the number on d2 can flash independently.
   set_digit(2);
   clear_display(1);
@@ -403,4 +418,11 @@ uint8_t get_min_left(uint32_t time_left) {
 
 uint8_t get_sec_left(uint32_t time_left) {
   return (time_left % ones_mins) / 1000;
+}
+
+void buzzer_alarm() {
+  digitalWrite(buzzer_pin, HIGH);
+  delayMicroseconds(buzzer_rate);
+  digitalWrite(buzzer_pin, LOW);
+  delayMicroseconds(buzzer_rate);
 }
