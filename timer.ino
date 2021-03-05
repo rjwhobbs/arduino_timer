@@ -155,7 +155,7 @@ void read_user_input() {
         }
       }
       else if (unit_button_state) {
-        if (user_input > tens_mins && user_input - tens_mins >= ones_mins) {
+        if (user_input > tens_mins && user_input - tens_mins >= 0) {
           user_input -= tens_mins;
         }
       }
