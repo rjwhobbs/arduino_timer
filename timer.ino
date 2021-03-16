@@ -1,8 +1,8 @@
 const uint8_t down_button = A3;
 const uint8_t up_button = A2;
 const uint8_t unit_button = A1;
-const uint8_t start_button = A5;
-const uint8_t buzzer_pin = 12;
+const uint8_t start_button = A0;
+const uint8_t buzzer_pin = 1;
 const uint32_t max_mins = 5940000;
 const uint32_t ones_mins = 60000;
 const uint32_t tens_mins = 600000;
@@ -13,8 +13,12 @@ uint8_t start = 0;
 uint8_t pause_pressed = 0;
 uint8_t unit_button_state = 0;
 
+// The analog reads on the board I'm using are
+// very noisy.
+const uint16_t read_true = 1000;
+
 // 4 digit 7 segment display
-const uint8_t a = 1;
+const uint8_t a = 12;
 const uint8_t b = 2;
 const uint8_t c = 3;
 const uint8_t d = 4;
@@ -57,7 +61,7 @@ void read_user_input();
 void buzzer_alarm();
 
 void setup() {
-  // Serial.begin(9600);
+//   Serial.begin(9600);/
 
   pinMode(down_button, INPUT);
   pinMode(up_button, INPUT);
@@ -83,10 +87,10 @@ void setup() {
 
 void loop() {
 
-  if (analogRead(start_button)) {
+  if (analogRead(start_button) > read_true) {
     pause_pressed = 1;
   }
-  if (!analogRead(start_button) && pause_pressed) {
+  if (analogRead(start_button) < read_true && pause_pressed) {
     pause_pressed = 0;
     start = 0;
     flash_d1 = 0;
@@ -102,7 +106,7 @@ void loop() {
   if (!user_input) {
     start_time = millis();
 
-    // Buzzer softly sounds if initialized so
+    // Buzzer softly sounds when initialized so
     // I initialized it here rather.
     pinMode(buzzer_pin, OUTPUT);
   }
@@ -131,10 +135,12 @@ void read_user_input() {
 
     set_flash_state();
 
-    if (analogRead(up_button)) {
-      while (analogRead(up_button)) {
+    if (analogRead(up_button) > read_true) {
+      while (analogRead(up_button) > read_true) {
         set_flash_state();
         display_all();
+        Serial.println("UP");
+        
       }
       if (!unit_button_state && user_input < max_mins) {
         user_input += ones_mins;
@@ -144,10 +150,11 @@ void read_user_input() {
       }
     }
 
-    if (analogRead(down_button)) {
-      while (analogRead(down_button)) {
+    if (analogRead(down_button) > read_true) {
+      while (analogRead(down_button) > read_true) {
         set_flash_state();
         display_all();
+//        Serial.println("DOWN");/
       }
       if (!unit_button_state) {
         if (user_input > ones_mins) {
@@ -161,20 +168,22 @@ void read_user_input() {
       }
     }
 
-    if (analogRead(unit_button)) {
-      while (analogRead(unit_button)) {
+    if (analogRead(unit_button) > read_true) {
+      while (analogRead(unit_button) > read_true) {
         set_flash_state();
         display_all();
+//        Serial.println("UNIT");/
       }
       unit_button_state = !unit_button_state;
       flash_d1 = !flash_d1;
       flash_d2 = !flash_d2;
     }
 
-    if (analogRead(start_button)) {
-      while (analogRead(start_button))  {
+    if (analogRead(start_button) > read_true) {
+      while (analogRead(start_button) > read_true)  {
         set_flash_state();
         display_all();
+//        Serial.println("START");
       }
       start = 1;
       flash_d1 = 0;
