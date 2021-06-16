@@ -1,10 +1,7 @@
 # arduino_timer
 A simple timer made with the pro mini.
 
-A very basic timer, I tried to challenge myself and not reference other projects or use any libraries so there may be some issues here and 
-there but for the most part I am quite happy with it. I decided ofcourse to use `millis()` to keep track of the time elapsed, if the value returned 
-from `millis()` would overflow that would be fine as the start value used to measure when a second has elapsed would also overflow and the time
-left is not adversely affected.
+A very basic timer, I tried to challenge myself and not reference other projects or use any libraries. I decided ofcourse to use `millis()` to keep track of the time elapsed, if the value returned from `millis()` would overflow that would be fine as the start value used to measure when a second has elapsed would also overflow and the time left is not adversely affected.
 
 <p align="center">
   <img src="pro_mini_timer.jpg" width="350">
